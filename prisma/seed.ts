@@ -1,14 +1,22 @@
+import 'dotenv/config'
 import { PrismaClient } from '@prisma/client'
 import { PrismaPg } from '@prisma/adapter-pg'
 import pg from 'pg'
 
 const connectionString = `${process.env.DATABASE_URL}`
-const pool = new pg.Pool({ connectionString })
+
+const pool = new pg.Pool({ 
+  connectionString,
+  ssl: { rejectUnauthorized: false } // Always on for seeding to production
+})
+
 const adapter = new PrismaPg(pool)
 
 const prisma = new PrismaClient({ adapter })
 
 async function main() {
+  console.log('Starting seed process...')
+  
   // Only seed if no products exist
   const count = await prisma.product.count()
   if (count > 0) {
@@ -56,7 +64,7 @@ async function main() {
 
 main()
   .catch((e) => {
-    console.error(e)
+    console.error('Seed error:', e)
     process.exit(1)
   })
   .finally(async () => {
