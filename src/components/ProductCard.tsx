@@ -17,7 +17,8 @@ interface Product {
 export default function ProductCard({ product }: { product: Product }) {
   const addItem = useCart((state) => state.addItem)
   const [quantity, setQuantity] = useState(1)
-  const reviewCount = Math.floor(Math.random() * 20) + 5
+  // Deterministic review count from product ID to avoid hydration mismatch
+  const reviewCount = product.id.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0) % 20 + 5
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault()

@@ -1,12 +1,15 @@
 import { PrismaClient } from '@prisma/client'
-import { PrismaBetterSqlite3 } from '@prisma/adapter-better-sqlite3'
 
-const adapter = new PrismaBetterSqlite3({ url: 'prisma/dev.db' })
-const prisma = new PrismaClient({ adapter })
+const prisma = new PrismaClient()
 
 async function main() {
-  await prisma.product.deleteMany() // Clear existing products
-  
+  // Only seed if no products exist
+  const count = await prisma.product.count()
+  if (count > 0) {
+    console.log(`Database already has ${count} products, skipping seed.`)
+    return
+  }
+
   const products = [
     {
       name: 'Soft Pink Crochet Rose',
@@ -26,22 +29,20 @@ async function main() {
       name: 'Lavender Dream Sprig',
       description: 'Delicate crochet lavender, offering a rustic yet premium touch to your floral arrangements.',
       price: 18.50,
-      imageUrl: '/rose.png', // Reusing image placeholder
+      imageUrl: '/rose.png',
       stock: 20,
     },
     {
       name: 'Miniature Succulent Pot',
       description: 'Cute, zero-maintenance crochet succulent. A perfect desk companion.',
       price: 15.00,
-      imageUrl: '/sunflowers.png', // Reusing image placeholder
+      imageUrl: '/sunflowers.png',
       stock: 10,
     }
   ]
 
   for (const product of products) {
-    await prisma.product.create({
-      data: product
-    })
+    await prisma.product.create({ data: product })
   }
   
   console.log('Seeded database with products!')
